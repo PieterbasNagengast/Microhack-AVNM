@@ -27,6 +27,17 @@
                                 "visible": true
                             },
                             {
+                                "name": "resourceGroupName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Resourcegroup Name",
+                                "defaultValue": "rg-microhack-avnm",
+                                "toolTip": "Resourcegroup name for deployment. Default = rg-microhack-avnm",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
                                 "name": "regionsAPI",
                                 "type": "Microsoft.Solutions.ArmApiControl",
                                 "request": {
@@ -392,7 +403,7 @@
                     "vmSize": "[steps('vm').size]",
                     "adminPassword": "[steps('vm').adminPassword.password]",
                     "adminUsername": "[steps('vm').adminUsername]",
-                    "resourceGroupName": "[steps('basics').resourceScope.resourceGroupName]"
+                    "resourceGroupName": "[steps('basics').resourceGroupName]"
                 }
             }
         }
