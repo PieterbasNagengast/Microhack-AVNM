@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.22.6.54827",
-      "templateHash": "1997188096806753057"
+      "templateHash": "3070607992558399141"
     }
   },
   "parameters": {
@@ -28,10 +28,12 @@
       "defaultValue": "Standard_b2s"
     },
     "adminUsername": {
-      "type": "securestring"
+      "type": "securestring",
+      "defaultValue": ""
     },
     "adminPassword": {
-      "type": "securestring"
+      "type": "securestring",
+      "defaultValue": ""
     },
     "HubNetworks": {
       "type": "array"
@@ -91,8 +93,12 @@
           "deployVM": {
             "value": "[parameters('HubNetworks')[copyIndex()].deployVM]"
           },
-          "adminUsername": "[if(parameters('HubNetworks')[copyIndex()].deployVM, createObject('value', parameters('adminUsername')), createObject('value', ''))]",
-          "adminPassword": "[if(parameters('HubNetworks')[copyIndex()].deployVM, createObject('value', parameters('adminPassword')), createObject('value', ''))]",
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
           "osType": {
             "value": "[string(parameters('HubNetworks')[copyIndex()].osType)]"
           },
@@ -793,8 +799,12 @@
           "deployVM": {
             "value": "[variables('varSpokeNetworks')[copyIndex()].deployVM]"
           },
-          "adminUsername": "[if(variables('varSpokeNetworks')[copyIndex()].deployVM, createObject('value', parameters('adminUsername')), createObject('value', ''))]",
-          "adminPassword": "[if(variables('varSpokeNetworks')[copyIndex()].deployVM, createObject('value', parameters('adminPassword')), createObject('value', ''))]",
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
           "osType": {
             "value": "[string(variables('varSpokeNetworks')[copyIndex()].osType)]"
           },

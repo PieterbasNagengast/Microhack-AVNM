@@ -9,10 +9,10 @@ param tagsByResource object = {}
 param vmsize string = 'Standard_b2s'
 
 @secure()
-param adminUsername string
+param adminUsername string = ''
 
 @secure()
-param adminPassword string
+param adminPassword string = ''
 
 // // define the os type
 // type _osType = 'Windows' | 'Linux' | 'none'
@@ -75,8 +75,8 @@ module deployHubNetworks 'deployNetworks.bicep' = [for (hubNetwork, i) in HubNet
     deployBastion: hubNetwork.deployBastion
     deployGateway: hubNetwork.deployGateway
     deployVM: hubNetwork.deployVM
-    adminUsername: hubNetwork.deployVM ? adminUsername : ''
-    adminPassword: hubNetwork.deployVM ? adminPassword : ''
+    adminUsername: adminUsername
+    adminPassword: adminPassword
     osType: string(hubNetwork.osType)
     vmSize: vmsize
     tagsByResource: tagsByResource
@@ -92,8 +92,8 @@ module deploySpokeNetworks 'deployNetworks.bicep' = [for (spokeNetwork, i) in va
     location: spokeNetwork.region
     addressPrefixes: array(ipSpaces[i + length(HubNetworks)])
     deployVM: spokeNetwork.deployVM
-    adminUsername: spokeNetwork.deployVM ? adminUsername : ''
-    adminPassword: spokeNetwork.deployVM ? adminPassword : ''
+    adminUsername: adminUsername
+    adminPassword: adminPassword
     osType: string(spokeNetwork.osType)
     vmSize: vmsize
     tagsByResource: tagsByResource
