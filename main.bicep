@@ -49,7 +49,7 @@ var amountOfNetworks = length(HubNetworks) + length(SpokeNetworks)
 var ipSpaces = [for i in range(1, amountOfNetworks): cidrSubnet(ipAddressSpace, 24, i)]
 
 // create array and flatten the spoke networks
-var varSpokeNetworks = flatten(map(SpokeNetworks, spoke => map(range(1, int(spoke.amount)), i => {
+var varSpokeNetworks = flatten(map(SpokeNetworks, spoke => map(range(0, int(spoke.amount)), i => {
         name: '${spoke.prefix}-${i}'
         region: spoke.region
         deployVM: spoke.deployVM
@@ -102,3 +102,5 @@ module deploySpokeNetworks 'deployNetworks.bicep' = [for (spokeNetwork, i) in va
 }]
 
 output ipSpaces array = ipSpaces
+output HubNetworks array = HubNetworks
+output SpokeNetworks array = varSpokeNetworks

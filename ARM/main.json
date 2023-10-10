@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.22.6.54827",
-      "templateHash": "5152221534085386094"
+      "templateHash": "1515898630618416251"
     }
   },
   "parameters": {
@@ -51,7 +51,7 @@
       }
     ],
     "amountOfNetworks": "[add(length(parameters('HubNetworks')), length(parameters('SpokeNetworks')))]",
-    "varSpokeNetworks": "[flatten(map(parameters('SpokeNetworks'), lambda('spoke', map(range(1, int(lambdaVariables('spoke').amount)), lambda('i', createObject('name', format('{0}-{1}', lambdaVariables('spoke').prefix, lambdaVariables('i')), 'region', lambdaVariables('spoke').region, 'deployVM', lambdaVariables('spoke').deployVM, 'osType', lambdaVariables('spoke').osType))))))]"
+    "varSpokeNetworks": "[flatten(map(parameters('SpokeNetworks'), lambda('spoke', map(range(0, int(lambdaVariables('spoke').amount)), lambda('i', createObject('name', format('{0}-{1}', lambdaVariables('spoke').prefix, lambdaVariables('i')), 'region', lambdaVariables('spoke').region, 'deployVM', lambdaVariables('spoke').deployVM, 'osType', lambdaVariables('spoke').osType))))))]"
   },
   "resources": [
     {
@@ -1484,6 +1484,14 @@
     "ipSpaces": {
       "type": "array",
       "value": "[variables('ipSpaces')]"
+    },
+    "HubNetworks": {
+      "type": "array",
+      "value": "[parameters('HubNetworks')]"
+    },
+    "SpokeNetworks": {
+      "type": "array",
+      "value": "[variables('varSpokeNetworks')]"
     }
   }
 }
