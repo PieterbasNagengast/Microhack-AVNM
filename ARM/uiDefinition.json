@@ -391,7 +391,8 @@
                     "ipAddressSpace": "[steps('basics').AddressSpace]",
                     "vmSize": "[steps('vm').size]",
                     "adminPassword": "[steps('vm').adminPassword.password]",
-                    "adminUsername": "[steps('vm').adminUsername]"
+                    "adminUsername": "[steps('vm').adminUsername]",
+                    "resourceGroupName": "[steps('basics').resourceScope.resourceGroupName]"
                 }
             }
         }
