@@ -43,7 +43,7 @@ param HubNetworks array
 param SpokeNetworks array
 
 // amount of the counts of all spoke networks
-var amountOfNetworks = length(HubNetworks) + length(SpokeNetworks)
+var amountOfNetworks = length(HubNetworks) + length(varSpokeNetworks)
 
 // create the ip spaces for all networks
 var ipSpaces = [for i in range(1, amountOfNetworks): cidrSubnet(ipAddressSpace, 24, i)]

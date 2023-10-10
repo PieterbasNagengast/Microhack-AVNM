@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.22.6.54827",
-      "templateHash": "1515898630618416251"
+      "templateHash": "18805530906387984"
     }
   },
   "parameters": {
@@ -50,7 +50,7 @@
         "input": "[cidrSubnet(parameters('ipAddressSpace'), 24, range(1, variables('amountOfNetworks'))[copyIndex('ipSpaces')])]"
       }
     ],
-    "amountOfNetworks": "[add(length(parameters('HubNetworks')), length(parameters('SpokeNetworks')))]",
+    "amountOfNetworks": "[add(length(parameters('HubNetworks')), length(variables('varSpokeNetworks')))]",
     "varSpokeNetworks": "[flatten(map(parameters('SpokeNetworks'), lambda('spoke', map(range(0, int(lambdaVariables('spoke').amount)), lambda('i', createObject('name', format('{0}-{1}', lambdaVariables('spoke').prefix, lambdaVariables('i')), 'region', lambdaVariables('spoke').region, 'deployVM', lambdaVariables('spoke').deployVM, 'osType', lambdaVariables('spoke').osType))))))]"
   },
   "resources": [
