@@ -62,7 +62,7 @@ var varSpokeNetworks = flatten(map(SpokeNetworks, spoke => map(range(0, int(spok
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: resourceGroupName
   location: location
-  tags: contains(tagsByResource, 'Microsoft.Network/resourceGroups') ? tagsByResource['Microsoft.Network/resourceGroups'] : {}
+  tags: contains(tagsByResource, 'Microsoft.Resources/subscriptions/resourceGroups') ? tagsByResource['Microsoft.Resources/subscriptions/resourceGroups'] : {}
 }
 
 // deploy the hub networks

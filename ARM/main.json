@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.22.6.54827",
-      "templateHash": "18805530906387984"
+      "templateHash": "8976780034885141664"
     }
   },
   "parameters": {
@@ -59,7 +59,7 @@
       "apiVersion": "2023-07-01",
       "name": "[parameters('resourceGroupName')]",
       "location": "[parameters('location')]",
-      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/resourceGroups'), parameters('tagsByResource')['Microsoft.Network/resourceGroups'], createObject())]"
+      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Resources/subscriptions/resourceGroups'), parameters('tagsByResource')['Microsoft.Resources/subscriptions/resourceGroups'], createObject())]"
     },
     {
       "copy": {
