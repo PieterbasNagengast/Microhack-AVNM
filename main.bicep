@@ -74,7 +74,7 @@ module deployHubNetworks 'deployNetworks.bicep' = [for (hubNetwork, i) in HubNet
     addressPrefixes: array(ipSpaces[i])
     deployBastion: bool(hubNetwork.deployBastion)
     deployGateway: bool(hubNetwork.deployGateway)
-    deployVM: hubNetwork.deployVM
+    deployVM: bool(hubNetwork.deployVM)
     adminUsername: adminUsername
     adminPassword: adminPassword
     osType: string(hubNetwork.osType)

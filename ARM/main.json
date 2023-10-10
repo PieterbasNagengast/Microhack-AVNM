@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.22.6.54827",
-      "templateHash": "16717829128769777600"
+      "templateHash": "4667706405002990227"
     }
   },
   "parameters": {
@@ -91,7 +91,7 @@
             "value": "[bool(parameters('HubNetworks')[copyIndex()].deployGateway)]"
           },
           "deployVM": {
-            "value": "[parameters('HubNetworks')[copyIndex()].deployVM]"
+            "value": "[bool(parameters('HubNetworks')[copyIndex()].deployVM)]"
           },
           "adminUsername": {
             "value": "[parameters('adminUsername')]"
