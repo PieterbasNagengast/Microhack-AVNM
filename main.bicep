@@ -72,8 +72,8 @@ module deployHubNetworks 'deployNetworks.bicep' = [for (hubNetwork, i) in HubNet
     name: hubNetwork.name
     location: hubNetwork.region
     addressPrefixes: array(ipSpaces[i])
-    deployBastion: hubNetwork.deployBastion
-    deployGateway: hubNetwork.deployGateway
+    deployBastion: bool(hubNetwork.deployBastion)
+    deployGateway: bool(hubNetwork.deployGateway)
     deployVM: hubNetwork.deployVM
     adminUsername: adminUsername
     adminPassword: adminPassword
@@ -91,7 +91,7 @@ module deploySpokeNetworks 'deployNetworks.bicep' = [for (spokeNetwork, i) in va
     name: spokeNetwork.name
     location: spokeNetwork.region
     addressPrefixes: array(ipSpaces[i + length(HubNetworks)])
-    deployVM: spokeNetwork.deployVM
+    deployVM: bool(spokeNetwork.deployVM)
     adminUsername: adminUsername
     adminPassword: adminPassword
     osType: string(spokeNetwork.osType)

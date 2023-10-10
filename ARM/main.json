@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.22.6.54827",
-      "templateHash": "3070607992558399141"
+      "templateHash": "16717829128769777600"
     }
   },
   "parameters": {
@@ -85,10 +85,10 @@
             "value": "[array(variables('ipSpaces')[copyIndex()])]"
           },
           "deployBastion": {
-            "value": "[parameters('HubNetworks')[copyIndex()].deployBastion]"
+            "value": "[bool(parameters('HubNetworks')[copyIndex()].deployBastion)]"
           },
           "deployGateway": {
-            "value": "[parameters('HubNetworks')[copyIndex()].deployGateway]"
+            "value": "[bool(parameters('HubNetworks')[copyIndex()].deployGateway)]"
           },
           "deployVM": {
             "value": "[parameters('HubNetworks')[copyIndex()].deployVM]"
@@ -797,7 +797,7 @@
             "value": "[array(variables('ipSpaces')[add(copyIndex(), length(parameters('HubNetworks')))])]"
           },
           "deployVM": {
-            "value": "[variables('varSpokeNetworks')[copyIndex()].deployVM]"
+            "value": "[bool(variables('varSpokeNetworks')[copyIndex()].deployVM)]"
           },
           "adminUsername": {
             "value": "[parameters('adminUsername')]"
