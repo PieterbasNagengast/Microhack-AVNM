@@ -14,33 +14,33 @@ param adminUsername string
 @secure()
 param adminPassword string
 
-// define the os type
-type _osType = 'Windows' | 'Linux' | 'none'
+// // define the os type
+// type _osType = 'Windows' | 'Linux' | 'none'
 
-// define the hub networks type
-type _Hubs = {
-  region: string
-  name: string
-  deployBastion: bool
-  deployGateway: bool
-  deployVM: bool
-  osType: _osType
-}[]
+// // define the hub networks type
+// type _Hubs = {
+//   region: string
+//   name: string
+//   deployBastion: bool
+//   deployGateway: bool
+//   deployVM: bool
+//   osType: _osType
+// }[]
 
-// define the spoke networks type
-type _Spokes = {
-  region: string
-  prefix: string
-  amount: int
-  deployVM: bool
-  osType: _osType
-}[]
+// // define the spoke networks type
+// type _Spokes = {
+//   region: string
+//   prefix: string
+//   amount: int
+//   deployVM: bool
+//   osType: _osType
+// }[]
 
 // define the hub networks
-param HubNetworks _Hubs
+param HubNetworks array
 
 // define the spoke networks
-param SpokeNetworks _Spokes
+param SpokeNetworks array
 
 // amount of the counts of all spoke networks
 var amountOfNetworks = length(HubNetworks) + length(SpokeNetworks)

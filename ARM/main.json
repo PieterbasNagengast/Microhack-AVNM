@@ -1,71 +1,11 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
-  "languageVersion": "2.0",
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
       "version": "0.22.6.54827",
-      "templateHash": "13966719546585586485"
-    }
-  },
-  "definitions": {
-    "_osType": {
-      "type": "string",
-      "allowedValues": [
-        "Linux",
-        "Windows",
-        "none"
-      ]
-    },
-    "_Hubs": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "region": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "deployBastion": {
-            "type": "bool"
-          },
-          "deployGateway": {
-            "type": "bool"
-          },
-          "deployVM": {
-            "type": "bool"
-          },
-          "osType": {
-            "$ref": "#/definitions/_osType"
-          }
-        }
-      }
-    },
-    "_Spokes": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "region": {
-            "type": "string"
-          },
-          "prefix": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "int"
-          },
-          "deployVM": {
-            "type": "bool"
-          },
-          "osType": {
-            "$ref": "#/definitions/_osType"
-          }
-        }
-      }
+      "templateHash": "11750785908140836593"
     }
   },
   "parameters": {
@@ -94,10 +34,10 @@
       "type": "securestring"
     },
     "HubNetworks": {
-      "$ref": "#/definitions/_Hubs"
+      "type": "array"
     },
     "SpokeNetworks": {
-      "$ref": "#/definitions/_Spokes"
+      "type": "array"
     }
   },
   "variables": {
@@ -111,14 +51,14 @@
     "amountOfNetworks": "[add(length(parameters('HubNetworks')), length(parameters('SpokeNetworks')))]",
     "varSpokeNetworks": "[flatten(map(parameters('SpokeNetworks'), lambda('spoke', map(range(1, lambdaVariables('spoke').amount), lambda('i', createObject('name', format('{0}-{1}', lambdaVariables('spoke').prefix, lambdaVariables('i')), 'region', lambdaVariables('spoke').region, 'deployVM', lambdaVariables('spoke').deployVM, 'osType', lambdaVariables('spoke').osType))))))]"
   },
-  "resources": {
-    "rg": {
+  "resources": [
+    {
       "type": "Microsoft.Resources/resourceGroups",
       "apiVersion": "2023-07-01",
       "name": "[parameters('resourceGroupName')]",
       "location": "[parameters('location')]"
     },
-    "deployHubNetworks": {
+    {
       "copy": {
         "name": "deployHubNetworks",
         "count": "[length(parameters('HubNetworks'))]"
@@ -823,10 +763,10 @@
         }
       },
       "dependsOn": [
-        "rg"
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
       ]
     },
-    "deploySpokeNetworks": {
+    {
       "copy": {
         "name": "deploySpokeNetworks",
         "count": "[length(variables('varSpokeNetworks'))]"
@@ -1525,10 +1465,10 @@
         }
       },
       "dependsOn": [
-        "rg"
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
       ]
     }
-  },
+  ],
   "outputs": {
     "ipSpaces": {
       "type": "array",
