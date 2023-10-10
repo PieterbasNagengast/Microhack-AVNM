@@ -1,0 +1,1538 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "languageVersion": "2.0",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.22.6.54827",
+      "templateHash": "13966719546585586485"
+    }
+  },
+  "definitions": {
+    "_osType": {
+      "type": "string",
+      "allowedValues": [
+        "Linux",
+        "Windows",
+        "none"
+      ]
+    },
+    "_Hubs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "deployBastion": {
+            "type": "bool"
+          },
+          "deployGateway": {
+            "type": "bool"
+          },
+          "deployVM": {
+            "type": "bool"
+          },
+          "osType": {
+            "$ref": "#/definitions/_osType"
+          }
+        }
+      }
+    },
+    "_Spokes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "int"
+          },
+          "deployVM": {
+            "type": "bool"
+          },
+          "osType": {
+            "$ref": "#/definitions/_osType"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "ipAddressSpace": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[deployment().location]"
+    },
+    "resourceGroupName": {
+      "type": "string"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "vmsize": {
+      "type": "string",
+      "defaultValue": "Standard_b2s"
+    },
+    "adminUsername": {
+      "type": "securestring"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "HubNetworks": {
+      "$ref": "#/definitions/_Hubs"
+    },
+    "SpokeNetworks": {
+      "$ref": "#/definitions/_Spokes"
+    }
+  },
+  "variables": {
+    "copy": [
+      {
+        "name": "ipSpaces",
+        "count": "[length(range(1, variables('amountOfNetworks')))]",
+        "input": "[cidrSubnet(parameters('ipAddressSpace'), 24, range(1, variables('amountOfNetworks'))[copyIndex('ipSpaces')])]"
+      }
+    ],
+    "amountOfNetworks": "[add(length(parameters('HubNetworks')), length(parameters('SpokeNetworks')))]",
+    "varSpokeNetworks": "[flatten(map(parameters('SpokeNetworks'), lambda('spoke', map(range(1, lambdaVariables('spoke').amount), lambda('i', createObject('name', format('{0}-{1}', lambdaVariables('spoke').prefix, lambdaVariables('i')), 'region', lambdaVariables('spoke').region, 'deployVM', lambdaVariables('spoke').deployVM, 'osType', lambdaVariables('spoke').osType))))))]"
+  },
+  "resources": {
+    "rg": {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2023-07-01",
+      "name": "[parameters('resourceGroupName')]",
+      "location": "[parameters('location')]"
+    },
+    "deployHubNetworks": {
+      "copy": {
+        "name": "deployHubNetworks",
+        "count": "[length(parameters('HubNetworks'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('Deploy-Hub-{0}-{1}', copyIndex(), parameters('HubNetworks')[copyIndex()].region)]",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('HubNetworks')[copyIndex()].name]"
+          },
+          "location": {
+            "value": "[parameters('HubNetworks')[copyIndex()].region]"
+          },
+          "addressPrefixes": {
+            "value": "[array(variables('ipSpaces')[copyIndex()])]"
+          },
+          "deployBastion": {
+            "value": "[parameters('HubNetworks')[copyIndex()].deployBastion]"
+          },
+          "deployGateway": {
+            "value": "[parameters('HubNetworks')[copyIndex()].deployGateway]"
+          },
+          "deployVM": {
+            "value": "[parameters('HubNetworks')[copyIndex()].deployVM]"
+          },
+          "adminUsername": "[if(parameters('HubNetworks')[copyIndex()].deployVM, createObject('value', parameters('adminUsername')), createObject('value', ''))]",
+          "adminPassword": "[if(parameters('HubNetworks')[copyIndex()].deployVM, createObject('value', parameters('adminPassword')), createObject('value', ''))]",
+          "osType": {
+            "value": "[string(parameters('HubNetworks')[copyIndex()].osType)]"
+          },
+          "vmSize": {
+            "value": "[parameters('vmsize')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.22.6.54827",
+              "templateHash": "1698466552368227456"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "addressPrefixes": {
+              "type": "array"
+            },
+            "deployBastion": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "deployGateway": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "tagsByResource": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "deployVM": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "vmSize": {
+              "type": "string"
+            },
+            "osType": {
+              "type": "string"
+            },
+            "bastionSku": {
+              "type": "string",
+              "defaultValue": "Standard"
+            },
+            "adminUsername": {
+              "type": "securestring"
+            },
+            "adminPassword": {
+              "type": "securestring"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-NSG-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-nsg', parameters('name'))]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "5955756700890778568"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/networkSecurityGroups",
+                      "apiVersion": "2021-05-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], createObject())]"
+                    }
+                  ],
+                  "outputs": {
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('name'))]"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-VNET-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "addressPrefixes": {
+                    "value": "[parameters('addressPrefixes')]"
+                  },
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-vnet', parameters('name'))]"
+                  },
+                  "deployBastion": {
+                    "value": "[parameters('deployBastion')]"
+                  },
+                  "deployGateway": {
+                    "value": "[parameters('deployGateway')]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  },
+                  "nsgID": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}', parameters('name'))), '2022-09-01').outputs.id.value]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "2921072502500438091"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "addressPrefixes": {
+                      "type": "array"
+                    },
+                    "nsgID": {
+                      "type": "string"
+                    },
+                    "deployBastion": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "deployGateway": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "variables": {
+                    "defaultSubnet": [
+                      {
+                        "name": "default",
+                        "properties": {
+                          "addressPrefix": "[cidrSubnet(parameters('addressPrefixes')[0], 26, 0)]",
+                          "networkSecurityGroup": {
+                            "id": "[parameters('nsgID')]"
+                          }
+                        }
+                      }
+                    ],
+                    "bastionSubnet": "[if(parameters('deployBastion'), createArray(createObject('name', 'AzureBastionSubnet', 'properties', createObject('addressPrefix', cidrSubnet(parameters('addressPrefixes')[0], 26, 1)))), createArray())]",
+                    "gatewaySubnet": "[if(parameters('deployGateway'), createArray(createObject('name', 'GatewaySubnet', 'properties', createObject('addressPrefix', cidrSubnet(parameters('addressPrefixes')[0], 26, 2)))), createArray())]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/virtualNetworks",
+                      "apiVersion": "2023-05-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "addressSpace": {
+                          "addressPrefixes": "[parameters('addressPrefixes')]"
+                        },
+                        "subnets": "[concat(variables('defaultSubnet'), variables('bastionSubnet'), variables('gatewaySubnet'))]"
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], createObject())]"
+                    }
+                  ],
+                  "outputs": {
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('name'))]"
+                    },
+                    "defaultSubnetID": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('name'), 'default')]"
+                    },
+                    "bastionSubnetID": {
+                      "type": "string",
+                      "value": "[if(parameters('deployBastion'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('name'), 'AzureBastionSubnet'), 'Not deployed')]"
+                    },
+                    "gatewaySubnetID": {
+                      "type": "string",
+                      "value": "[if(parameters('deployGateway'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('name'), 'GatewaySubnet'), 'Not deployed')]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}', parameters('name')))]"
+              ]
+            },
+            {
+              "condition": "[parameters('deployVM')]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-VM-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-vm', parameters('name'))]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  },
+                  "subnetID": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name'))), '2022-09-01').outputs.defaultSubnetID.value]"
+                  },
+                  "adminUsername": {
+                    "value": "[parameters('adminUsername')]"
+                  },
+                  "adminPassword": {
+                    "value": "[parameters('adminPassword')]"
+                  },
+                  "vmSize": {
+                    "value": "[parameters('vmSize')]"
+                  },
+                  "osType": {
+                    "value": "[parameters('osType')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "17861669799069706632"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "adminUsername": {
+                      "type": "securestring"
+                    },
+                    "adminPassword": {
+                      "type": "securestring"
+                    },
+                    "subnetID": {
+                      "type": "string"
+                    },
+                    "vmSize": {
+                      "type": "string"
+                    },
+                    "storageType": {
+                      "type": "string",
+                      "defaultValue": "StandardSSD_LRS"
+                    },
+                    "osType": {
+                      "type": "string",
+                      "defaultValue": "Windows"
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "variables": {
+                    "Windows": {
+                      "publisher": "MicrosoftWindowsServer",
+                      "offer": "WindowsServer",
+                      "sku": "2022-datacenter-g2",
+                      "version": "latest"
+                    },
+                    "Linux": {
+                      "publisher": "Canonical",
+                      "offer": "0001-com-ubuntu-server-jammy",
+                      "sku": "22_04-lts-gen2",
+                      "version": "latest"
+                    },
+                    "imagereference": "[if(equals(parameters('osType'), 'Windows'), variables('Windows'), if(equals(parameters('osType'), 'Linux'), variables('Linux'), createObject()))]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Compute/virtualMachines",
+                      "apiVersion": "2021-11-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "osProfile": {
+                          "computerName": "[parameters('name')]",
+                          "adminUsername": "[parameters('adminUsername')]",
+                          "adminPassword": "[parameters('adminPassword')]"
+                        },
+                        "storageProfile": {
+                          "imageReference": "[variables('imagereference')]",
+                          "osDisk": {
+                            "createOption": "FromImage",
+                            "name": "[format('{0}-osDisk', parameters('name'))]",
+                            "managedDisk": {
+                              "storageAccountType": "[parameters('storageType')]"
+                            },
+                            "osType": "[parameters('osType')]",
+                            "deleteOption": "Delete"
+                          }
+                        },
+                        "networkProfile": {
+                          "networkInterfaces": [
+                            {
+                              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', parameters('name')))]",
+                              "properties": {
+                                "deleteOption": "Delete"
+                              }
+                            }
+                          ]
+                        },
+                        "hardwareProfile": {
+                          "vmSize": "[parameters('vmSize')]"
+                        },
+                        "diagnosticsProfile": {
+                          "bootDiagnostics": {
+                            "enabled": true
+                          }
+                        }
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], createObject())]",
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', parameters('name')))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/networkInterfaces",
+                      "apiVersion": "2021-05-01",
+                      "name": "[format('{0}-nic', parameters('name'))]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "ipConfigurations": [
+                          {
+                            "name": "ipconfig1",
+                            "properties": {
+                              "primary": true,
+                              "privateIPAllocationMethod": "Dynamic",
+                              "subnet": {
+                                "id": "[parameters('subnetID')]"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], createObject())]"
+                    }
+                  ],
+                  "outputs": {
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('name'))]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name')))]"
+              ]
+            },
+            {
+              "condition": "[parameters('deployBastion')]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-Bastion-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-bastion', parameters('name'))]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  },
+                  "subnetID": "[if(parameters('deployBastion'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name'))), '2022-09-01').outputs.bastionSubnetID.value), createObject('value', ''))]",
+                  "bastionSku": {
+                    "value": "[parameters('bastionSku')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "10764009231312661739"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "subnetID": {
+                      "type": "string"
+                    },
+                    "bastionSku": {
+                      "type": "string",
+                      "allowedValues": [
+                        "Basic",
+                        "Standard"
+                      ]
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/bastionHosts",
+                      "apiVersion": "2021-03-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "ipConfigurations": [
+                          {
+                            "name": "IpConf",
+                            "properties": {
+                              "subnet": {
+                                "id": "[parameters('subnetID')]"
+                              },
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', parameters('name')))]"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "sku": {
+                        "name": "[parameters('bastionSku')]"
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/bastionHosts'), parameters('tagsByResource')['Microsoft.Network/bastionHosts'], createObject())]",
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', parameters('name')))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2021-05-01",
+                      "name": "[format('{0}-pip', parameters('name'))]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static"
+                      },
+                      "sku": {
+                        "tier": "Regional",
+                        "name": "Standard"
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], createObject())]"
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name')))]"
+              ]
+            },
+            {
+              "condition": "[parameters('deployGateway')]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-Gateway-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-gateway', parameters('name'))]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  },
+                  "subnetID": "[if(parameters('deployGateway'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name'))), '2022-09-01').outputs.gatewaySubnetID.value), createObject('value', ''))]"
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "13622788588251772120"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "subnetID": {
+                      "type": "string"
+                    },
+                    "SKU": {
+                      "type": "string",
+                      "defaultValue": "VpnGw1"
+                    },
+                    "GatewayType": {
+                      "type": "string",
+                      "defaultValue": "Vpn"
+                    },
+                    "GatewayVPNtype": {
+                      "type": "string",
+                      "defaultValue": "RouteBased"
+                    },
+                    "GatewayGen": {
+                      "type": "string",
+                      "defaultValue": "Generation1"
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "variables": {
+                    "pipName": "[format('{0}-pip', parameters('name'))]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/virtualNetworkGateways",
+                      "apiVersion": "2021-05-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "gatewayType": "[parameters('GatewayType')]",
+                        "vpnType": "[parameters('GatewayVPNtype')]",
+                        "sku": {
+                          "name": "[parameters('SKU')]",
+                          "tier": "[parameters('SKU')]"
+                        },
+                        "vpnGatewayGeneration": "[parameters('GatewayGen')]",
+                        "activeActive": false,
+                        "ipConfigurations": [
+                          {
+                            "name": "ipConfig",
+                            "properties": {
+                              "privateIPAllocationMethod": "Dynamic",
+                              "subnet": {
+                                "id": "[parameters('subnetID')]"
+                              },
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworkGateways'), parameters('tagsByResource')['Microsoft.Network/virtualNetworkGateways'], createObject())]",
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2021-05-01",
+                      "name": "[variables('pipName')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static"
+                      },
+                      "sku": {
+                        "tier": "Regional",
+                        "name": "Standard"
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], createObject())]"
+                    }
+                  ],
+                  "outputs": {
+                    "pip": {
+                      "type": "string",
+                      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('pipName')), '2021-05-01').ipAddress]"
+                    },
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('name'))]"
+                    },
+                    "name": {
+                      "type": "string",
+                      "value": "[parameters('name')]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name')))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "rg"
+      ]
+    },
+    "deploySpokeNetworks": {
+      "copy": {
+        "name": "deploySpokeNetworks",
+        "count": "[length(variables('varSpokeNetworks'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('Deploy-Spoke-{0}-{1}', copyIndex(), variables('varSpokeNetworks')[copyIndex()].region)]",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('varSpokeNetworks')[copyIndex()].name]"
+          },
+          "location": {
+            "value": "[variables('varSpokeNetworks')[copyIndex()].region]"
+          },
+          "addressPrefixes": {
+            "value": "[array(variables('ipSpaces')[add(copyIndex(), length(parameters('HubNetworks')))])]"
+          },
+          "deployVM": {
+            "value": "[variables('varSpokeNetworks')[copyIndex()].deployVM]"
+          },
+          "adminUsername": "[if(variables('varSpokeNetworks')[copyIndex()].deployVM, createObject('value', parameters('adminUsername')), createObject('value', ''))]",
+          "adminPassword": "[if(variables('varSpokeNetworks')[copyIndex()].deployVM, createObject('value', parameters('adminPassword')), createObject('value', ''))]",
+          "osType": {
+            "value": "[string(variables('varSpokeNetworks')[copyIndex()].osType)]"
+          },
+          "vmSize": {
+            "value": "[parameters('vmsize')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.22.6.54827",
+              "templateHash": "1698466552368227456"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "addressPrefixes": {
+              "type": "array"
+            },
+            "deployBastion": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "deployGateway": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "tagsByResource": {
+              "type": "object",
+              "defaultValue": {}
+            },
+            "deployVM": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "vmSize": {
+              "type": "string"
+            },
+            "osType": {
+              "type": "string"
+            },
+            "bastionSku": {
+              "type": "string",
+              "defaultValue": "Standard"
+            },
+            "adminUsername": {
+              "type": "securestring"
+            },
+            "adminPassword": {
+              "type": "securestring"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-NSG-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-nsg', parameters('name'))]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "5955756700890778568"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/networkSecurityGroups",
+                      "apiVersion": "2021-05-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], createObject())]"
+                    }
+                  ],
+                  "outputs": {
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('name'))]"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-VNET-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "addressPrefixes": {
+                    "value": "[parameters('addressPrefixes')]"
+                  },
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-vnet', parameters('name'))]"
+                  },
+                  "deployBastion": {
+                    "value": "[parameters('deployBastion')]"
+                  },
+                  "deployGateway": {
+                    "value": "[parameters('deployGateway')]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  },
+                  "nsgID": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}', parameters('name'))), '2022-09-01').outputs.id.value]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "2921072502500438091"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "addressPrefixes": {
+                      "type": "array"
+                    },
+                    "nsgID": {
+                      "type": "string"
+                    },
+                    "deployBastion": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "deployGateway": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "variables": {
+                    "defaultSubnet": [
+                      {
+                        "name": "default",
+                        "properties": {
+                          "addressPrefix": "[cidrSubnet(parameters('addressPrefixes')[0], 26, 0)]",
+                          "networkSecurityGroup": {
+                            "id": "[parameters('nsgID')]"
+                          }
+                        }
+                      }
+                    ],
+                    "bastionSubnet": "[if(parameters('deployBastion'), createArray(createObject('name', 'AzureBastionSubnet', 'properties', createObject('addressPrefix', cidrSubnet(parameters('addressPrefixes')[0], 26, 1)))), createArray())]",
+                    "gatewaySubnet": "[if(parameters('deployGateway'), createArray(createObject('name', 'GatewaySubnet', 'properties', createObject('addressPrefix', cidrSubnet(parameters('addressPrefixes')[0], 26, 2)))), createArray())]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/virtualNetworks",
+                      "apiVersion": "2023-05-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "addressSpace": {
+                          "addressPrefixes": "[parameters('addressPrefixes')]"
+                        },
+                        "subnets": "[concat(variables('defaultSubnet'), variables('bastionSubnet'), variables('gatewaySubnet'))]"
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], createObject())]"
+                    }
+                  ],
+                  "outputs": {
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('name'))]"
+                    },
+                    "defaultSubnetID": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('name'), 'default')]"
+                    },
+                    "bastionSubnetID": {
+                      "type": "string",
+                      "value": "[if(parameters('deployBastion'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('name'), 'AzureBastionSubnet'), 'Not deployed')]"
+                    },
+                    "gatewaySubnetID": {
+                      "type": "string",
+                      "value": "[if(parameters('deployGateway'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('name'), 'GatewaySubnet'), 'Not deployed')]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}', parameters('name')))]"
+              ]
+            },
+            {
+              "condition": "[parameters('deployVM')]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-VM-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-vm', parameters('name'))]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  },
+                  "subnetID": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name'))), '2022-09-01').outputs.defaultSubnetID.value]"
+                  },
+                  "adminUsername": {
+                    "value": "[parameters('adminUsername')]"
+                  },
+                  "adminPassword": {
+                    "value": "[parameters('adminPassword')]"
+                  },
+                  "vmSize": {
+                    "value": "[parameters('vmSize')]"
+                  },
+                  "osType": {
+                    "value": "[parameters('osType')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "17861669799069706632"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "adminUsername": {
+                      "type": "securestring"
+                    },
+                    "adminPassword": {
+                      "type": "securestring"
+                    },
+                    "subnetID": {
+                      "type": "string"
+                    },
+                    "vmSize": {
+                      "type": "string"
+                    },
+                    "storageType": {
+                      "type": "string",
+                      "defaultValue": "StandardSSD_LRS"
+                    },
+                    "osType": {
+                      "type": "string",
+                      "defaultValue": "Windows"
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "variables": {
+                    "Windows": {
+                      "publisher": "MicrosoftWindowsServer",
+                      "offer": "WindowsServer",
+                      "sku": "2022-datacenter-g2",
+                      "version": "latest"
+                    },
+                    "Linux": {
+                      "publisher": "Canonical",
+                      "offer": "0001-com-ubuntu-server-jammy",
+                      "sku": "22_04-lts-gen2",
+                      "version": "latest"
+                    },
+                    "imagereference": "[if(equals(parameters('osType'), 'Windows'), variables('Windows'), if(equals(parameters('osType'), 'Linux'), variables('Linux'), createObject()))]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Compute/virtualMachines",
+                      "apiVersion": "2021-11-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "osProfile": {
+                          "computerName": "[parameters('name')]",
+                          "adminUsername": "[parameters('adminUsername')]",
+                          "adminPassword": "[parameters('adminPassword')]"
+                        },
+                        "storageProfile": {
+                          "imageReference": "[variables('imagereference')]",
+                          "osDisk": {
+                            "createOption": "FromImage",
+                            "name": "[format('{0}-osDisk', parameters('name'))]",
+                            "managedDisk": {
+                              "storageAccountType": "[parameters('storageType')]"
+                            },
+                            "osType": "[parameters('osType')]",
+                            "deleteOption": "Delete"
+                          }
+                        },
+                        "networkProfile": {
+                          "networkInterfaces": [
+                            {
+                              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', parameters('name')))]",
+                              "properties": {
+                                "deleteOption": "Delete"
+                              }
+                            }
+                          ]
+                        },
+                        "hardwareProfile": {
+                          "vmSize": "[parameters('vmSize')]"
+                        },
+                        "diagnosticsProfile": {
+                          "bootDiagnostics": {
+                            "enabled": true
+                          }
+                        }
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], createObject())]",
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', parameters('name')))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/networkInterfaces",
+                      "apiVersion": "2021-05-01",
+                      "name": "[format('{0}-nic', parameters('name'))]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "ipConfigurations": [
+                          {
+                            "name": "ipconfig1",
+                            "properties": {
+                              "primary": true,
+                              "privateIPAllocationMethod": "Dynamic",
+                              "subnet": {
+                                "id": "[parameters('subnetID')]"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], createObject())]"
+                    }
+                  ],
+                  "outputs": {
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('name'))]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name')))]"
+              ]
+            },
+            {
+              "condition": "[parameters('deployBastion')]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-Bastion-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-bastion', parameters('name'))]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  },
+                  "subnetID": "[if(parameters('deployBastion'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name'))), '2022-09-01').outputs.bastionSubnetID.value), createObject('value', ''))]",
+                  "bastionSku": {
+                    "value": "[parameters('bastionSku')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "10764009231312661739"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "subnetID": {
+                      "type": "string"
+                    },
+                    "bastionSku": {
+                      "type": "string",
+                      "allowedValues": [
+                        "Basic",
+                        "Standard"
+                      ]
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/bastionHosts",
+                      "apiVersion": "2021-03-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "ipConfigurations": [
+                          {
+                            "name": "IpConf",
+                            "properties": {
+                              "subnet": {
+                                "id": "[parameters('subnetID')]"
+                              },
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', parameters('name')))]"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "sku": {
+                        "name": "[parameters('bastionSku')]"
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/bastionHosts'), parameters('tagsByResource')['Microsoft.Network/bastionHosts'], createObject())]",
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', parameters('name')))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2021-05-01",
+                      "name": "[format('{0}-pip', parameters('name'))]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static"
+                      },
+                      "sku": {
+                        "tier": "Regional",
+                        "name": "Standard"
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], createObject())]"
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name')))]"
+              ]
+            },
+            {
+              "condition": "[parameters('deployGateway')]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('Deploy-Gateway-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[format('{0}-gateway', parameters('name'))]"
+                  },
+                  "tagsByResource": {
+                    "value": "[parameters('tagsByResource')]"
+                  },
+                  "subnetID": "[if(parameters('deployGateway'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name'))), '2022-09-01').outputs.gatewaySubnetID.value), createObject('value', ''))]"
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.22.6.54827",
+                      "templateHash": "13622788588251772120"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "subnetID": {
+                      "type": "string"
+                    },
+                    "SKU": {
+                      "type": "string",
+                      "defaultValue": "VpnGw1"
+                    },
+                    "GatewayType": {
+                      "type": "string",
+                      "defaultValue": "Vpn"
+                    },
+                    "GatewayVPNtype": {
+                      "type": "string",
+                      "defaultValue": "RouteBased"
+                    },
+                    "GatewayGen": {
+                      "type": "string",
+                      "defaultValue": "Generation1"
+                    },
+                    "tagsByResource": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "variables": {
+                    "pipName": "[format('{0}-pip', parameters('name'))]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/virtualNetworkGateways",
+                      "apiVersion": "2021-05-01",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "gatewayType": "[parameters('GatewayType')]",
+                        "vpnType": "[parameters('GatewayVPNtype')]",
+                        "sku": {
+                          "name": "[parameters('SKU')]",
+                          "tier": "[parameters('SKU')]"
+                        },
+                        "vpnGatewayGeneration": "[parameters('GatewayGen')]",
+                        "activeActive": false,
+                        "ipConfigurations": [
+                          {
+                            "name": "ipConfig",
+                            "properties": {
+                              "privateIPAllocationMethod": "Dynamic",
+                              "subnet": {
+                                "id": "[parameters('subnetID')]"
+                              },
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworkGateways'), parameters('tagsByResource')['Microsoft.Network/virtualNetworkGateways'], createObject())]",
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2021-05-01",
+                      "name": "[variables('pipName')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static"
+                      },
+                      "sku": {
+                        "tier": "Regional",
+                        "name": "Standard"
+                      },
+                      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], createObject())]"
+                    }
+                  ],
+                  "outputs": {
+                    "pip": {
+                      "type": "string",
+                      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('pipName')), '2021-05-01').ipAddress]"
+                    },
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('name'))]"
+                    },
+                    "name": {
+                      "type": "string",
+                      "value": "[parameters('name')]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}', parameters('name')))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "rg"
+      ]
+    }
+  },
+  "outputs": {
+    "ipSpaces": {
+      "type": "array",
+      "value": "[variables('ipSpaces')]"
+    }
+  }
+}

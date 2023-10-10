@@ -1,0 +1,398 @@
+    {
+        "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
+        "view": {
+            "kind": "Form",
+            "properties": {
+                "title": "MicroHack - Azure Virtual Network Manger",
+                "steps": [
+                    {
+                        "name": "basics",
+                        "label": "Basics",
+                        "elements": [
+                            {
+                                "name": "resourceScope",
+                                "type": "Microsoft.Common.ResourceScope"
+                            },
+                            {
+                                "name": "AddressSpace",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "IP Address Space",
+                                "defaultValue": "172.16.0.0/16",
+                                "toolTip": "IP Address space used for VNETs in deployment. Only enter a /16 subnet. Default = 172.16.0.0/16",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(10(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\\.0\\.0\\/16)|(172\\.(?:1[6-9]|2\\d|3[0-1])\\.0\\.0\\/16)|(192\\.168\\.0\\.0\\/16)",
+                                    "validationMessage": "The value must match a /16 subnet. 10.[0-255].0.0/16 or 172.[16-31].0.0/16 or 192.168.0.0/16"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "regionsAPI",
+                                "type": "Microsoft.Solutions.ArmApiControl",
+                                "request": {
+                                    "method": "GET",
+                                    "path": "[concat(steps('basics').resourceScope.subscription.id, '/locations?api-version=2022-12-01')]"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "hub",
+                        "label": "Hub Networks",
+                        "elements": [
+                            {
+                                "name": "networks",
+                                "type": "Microsoft.Common.EditableGrid",
+                                "ariaLabel": "Enter information per Hub Network",
+                                "label": "Hub Networks",
+                                "constraints": {
+                                    "width": "1fr",
+                                    "rows": {
+                                        "count": {
+                                            "min": 1,
+                                            "max": 10
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "id": "name",
+                                            "header": "Hub Name",
+                                            "width": "1fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.TextBox",
+                                                "placeholder": "Hub Name",
+                                                "constraints": {
+                                                    "required": true,
+                                                    "validations": [
+                                                        {
+                                                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                                                            "message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "region",
+                                            "header": "Region",
+                                            "width": "1fr",
+                                            "element": {
+                                                "name": "RegionDropDown",
+                                                "type": "Microsoft.Common.DropDown",
+                                                "placeholder": "Select a Region...",
+                                                "constraints": {
+                                                    "allowedValues": "[map(steps('basics').regionsAPI.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
+                                                    "required": true
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "deployBastion",
+                                            "header": "Deploy Bastion",
+                                            "width": "1fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.OptionsGroup",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "No",
+                                                            "value": "false"
+                                                        },
+                                                        {
+                                                            "label": "Yes",
+                                                            "value": "true"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "deployGateway",
+                                            "header": "Deploy Gateway",
+                                            "width": "1fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.OptionsGroup",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "No",
+                                                            "value": "false"
+                                                        },
+                                                        {
+                                                            "label": "Yes",
+                                                            "value": "true"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "deployVM",
+                                            "header": "Deploy VM",
+                                            "element": {
+                                                "type": "Microsoft.Common.OptionsGroup",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "No",
+                                                            "value": "false"
+                                                        },
+                                                        {
+                                                            "label": "Yes",
+                                                            "value": "true"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "osType",
+                                            "header": "VM OS Type",
+                                            "element": {
+                                                "name": "osTypeDropDown",
+                                                "type": "Microsoft.Common.DropDown",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "Windows",
+                                                            "value": "Windows"
+                                                        },
+                                                        {
+                                                            "label": "Linux",
+                                                            "value": "Linux"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "spoke",
+                        "label": "Spoke Networks",
+                        "elements": [
+                            {
+                                "name": "networks",
+                                "type": "Microsoft.Common.EditableGrid",
+                                "ariaLabel": "Enter information per Hub Network",
+                                "label": "Hub Networks",
+                                "constraints": {
+                                    "width": "1fr",
+                                    "rows": {
+                                        "count": {
+                                            "min": 1,
+                                            "max": 10
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "id": "prefix",
+                                            "header": "Spoke Prefix Name",
+                                            "width": "1fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.TextBox",
+                                                "placeholder": "Spoke Prefix Name",
+                                                "constraints": {
+                                                    "required": true,
+                                                    "validations": [
+                                                        {
+                                                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                                                            "message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "region",
+                                            "header": "Region",
+                                            "width": "1fr",
+                                            "element": {
+                                                "name": "RegionDropDown",
+                                                "type": "Microsoft.Common.DropDown",
+                                                "placeholder": "Select a Region...",
+                                                "constraints": {
+                                                    "allowedValues": "[map(steps('basics').regionsAPI.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
+                                                    "required": true
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "amount",
+                                            "header": "amount",
+                                            "width": "1fr",
+                                            "element": {
+                                                "name": "AmountDropDown",
+                                                "type": "Microsoft.Common.DropDown",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "1",
+                                                            "value": "1"
+                                                        },
+                                                        {
+                                                            "label": "2",
+                                                            "value": "2"
+                                                        },
+                                                        {
+                                                            "label": "3",
+                                                            "value": "3"
+                                                        },
+                                                        {
+                                                            "label": "4",
+                                                            "value": "4"
+                                                        },
+                                                        {
+                                                            "label": "5",
+                                                            "value": "5"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "deployVM",
+                                            "header": "Deploy VM",
+                                            "width": "1fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.OptionsGroup",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "No",
+                                                            "value": "false"
+                                                        },
+                                                        {
+                                                            "label": "Yes",
+                                                            "value": "true"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "osType",
+                                            "header": "VM OS Type",
+                                            "element": {
+                                                "name": "osTypeDropDown",
+                                                "type": "Microsoft.Common.DropDown",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "Windows",
+                                                            "value": "Windows"
+                                                        },
+                                                        {
+                                                            "label": "Linux",
+                                                            "value": "Linux"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "vm",
+                        "label": "Virtual Machines",
+                        "elements": [
+                            {
+                                "name": "size",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "label": "Virtual Machine SKU Size (Hub)",
+                                "toolTip": "Virtual Machine SKU Siz. Default = Standard_B2s",
+                                "recommendedSizes": [
+                                    "Standard_B2s"
+                                ],
+                                "constraints": {
+                                    "allowedSizes": []
+                                },
+                                "options": {
+                                    "hideDiskTypeFilter": false
+                                },
+                                "osPlatform": "Windows",
+                                "count": 1,
+                                "visible": true
+                            },
+                            {
+                                "name": "adminUsername",
+                                "type": "Microsoft.Compute.UserNameTextBox",
+                                "label": "Admin Username",
+                                "toolTip": "",
+                                "osPlatform": "Windows",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "adminPassword",
+                                "type": "Microsoft.Compute.CredentialsCombo",
+                                "label": {
+                                    "password": "Admin Password",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": {
+                                    "password": ""
+                                },
+                                "osPlatform": "Windows",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                },
+                                "visible": true
+                            }
+                        ]
+                    },
+                    {
+                        "name": "tags",
+                        "label": "Tags",
+                        "elements": [
+                            {
+                                "name": "tagsByResource",
+                                "type": "Microsoft.Common.TagsByResource",
+                                "resources": [
+                                    "Microsoft.Compute/virtualMachines",
+                                    "Microsoft.Network/networkSecurityGroups",
+                                    "Microsoft.Network/virtualNetworks",
+                                    "Microsoft.Network/bastionHosts",
+                                    "Microsoft.Network/virtualNetworkGateways",
+                                    "Microsoft.Network/publicIPAddresses",
+                                    "Microsoft.Resources/subscriptions/resourceGroups"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "outputs": {
+                "kind": "ResourceGroup",
+                "location": "[steps('basics').resourceScope.location.name]",
+                "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
+                "parameters": {
+                    "tagsByResource": "[steps('tags').tagsByResource]",
+                    "HubNetworks": "[steps('hub').networks]",
+                    "SpokeNetworks": "[steps('spoke').networks]",
+                    "ipAddressSpace": "[steps('basics').AddressSpace]",
+                    "vmSize": "[steps('vm').size]",
+                    "adminPassword": "[steps('vm').adminPassword.password]",
+                    "adminUsername": "[steps('vm').adminUsername]"
+                }
+            }
+        }
+    }
