@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.22.6.54827",
-      "templateHash": "12213391059880413925"
+      "templateHash": "15469156450154051495"
     }
   },
   "parameters": {
@@ -77,7 +77,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[parameters('HubNetworks')[copyIndex()].name]"
+            "value": "[format('{0}-{1}', parameters('HubNetworks')[copyIndex()].name, parameters('HubNetworks')[copyIndex()].region)]"
           },
           "location": {
             "value": "[parameters('HubNetworks')[copyIndex()].region]"

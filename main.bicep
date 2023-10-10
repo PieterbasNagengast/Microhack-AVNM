@@ -70,7 +70,7 @@ module deployHubNetworks 'deployNetworks.bicep' = [for (hubNetwork, i) in HubNet
   scope: rg
   name: 'Deploy-Hub-${i}-${hubNetwork.region}'
   params: {
-    name: hubNetwork.name
+    name: '${hubNetwork.name}-${hubNetwork.region}'
     location: hubNetwork.region
     addressPrefixes: array(ipSpaces[i])
     deployBastion: bool(hubNetwork.deployBastion)
