@@ -92,7 +92,7 @@
                                                 "type": "Microsoft.Common.DropDown",
                                                 "placeholder": "Select a Region...",
                                                 "constraints": {
-                                                    "allowedValues": "[map(steps('basics').regionsAPI.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
+                                                    "allowedValues": "[map(filter(steps('basics').regionsAPI.value,(i) => contains(i.metadata.regionType, 'Physical')), (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
                                                     "required": true
                                                 }
                                             }
@@ -230,7 +230,7 @@
                                                 "type": "Microsoft.Common.DropDown",
                                                 "placeholder": "Select a Region...",
                                                 "constraints": {
-                                                    "allowedValues": "[map(steps('basics').regionsAPI.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
+                                                    "allowedValues": "[map(filter(steps('basics').regionsAPI.value,(i) => contains(i.metadata.regionType, 'Physical')), (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.name, '\"}')))]",
                                                     "required": true
                                                 }
                                             }
