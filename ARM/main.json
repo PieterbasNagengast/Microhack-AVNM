@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "3421275856915026056"
+      "templateHash": "14097679488723122394"
     }
   },
   "parameters": {
@@ -51,7 +51,7 @@
       }
     ],
     "amountOfNetworks": "[add(length(parameters('HubNetworks')), length(variables('varSpokeNetworks')))]",
-    "varSpokeNetworks": "[flatten(map(parameters('SpokeNetworks'), lambda('spoke', map(range(0, int(lambdaVariables('spoke').amount)), lambda('i', createObject('name', format('{0}-{1}', lambdaVariables('spoke').prefix, lambdaVariables('i')), 'region', lambdaVariables('spoke').region, 'deployVM', lambdaVariables('spoke').deployVM, 'osType', lambdaVariables('spoke').osType))))))]"
+    "varSpokeNetworks": "[flatten(map(parameters('SpokeNetworks'), lambda('spoke', map(range(0, int(lambdaVariables('spoke').amount)), lambda('i', createObject('name', format('{0}-{1}', lambdaVariables('spoke').prefix, add(lambdaVariables('i'), 1)), 'region', lambdaVariables('spoke').region, 'deployVM', lambdaVariables('spoke').deployVM, 'osType', lambdaVariables('spoke').osType))))))]"
   },
   "resources": [
     {

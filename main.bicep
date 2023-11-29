@@ -50,7 +50,7 @@ var ipSpaces = [for i in range(1, amountOfNetworks): cidrSubnet(ipAddressSpace, 
 
 // create array and flatten the spoke networks
 var varSpokeNetworks = flatten(map(SpokeNetworks, spoke => map(range(0, int(spoke.amount)), i => {
-        name: '${spoke.prefix}-${i}'
+        name: '${spoke.prefix}-${i + 1}'
         region: spoke.region
         deployVM: spoke.deployVM
         osType: spoke.osType
