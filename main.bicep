@@ -50,7 +50,7 @@ var ipSpaces = [for i in range(1, amountOfNetworks): cidrSubnet(ipAddressSpace, 
 
 // create array and flatten the spoke networks
 var varSpokeNetworks = flatten(map(SpokeNetworks, spoke => map(range(0, int(spoke.amount)), i => {
-        name: '${spoke.prefix}-${spoke.region}-${i}'
+        name: '${spoke.prefix}-${i}'
         region: spoke.region
         deployVM: spoke.deployVM
         osType: spoke.osType
@@ -68,9 +68,9 @@ resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
 // deploy the hub networks
 module deployHubNetworks 'deployNetworks.bicep' = [for (hubNetwork, i) in HubNetworks: {
   scope: rg
-  name: 'Deploy-Hub-${i}-${hubNetwork.region}'
+  name: 'Deploy-Hub-${i + 1}-${hubNetwork.region}'
   params: {
-    name: '${hubNetwork.name}-${hubNetwork.region}'
+    name: hubNetwork.name
     location: hubNetwork.region
     addressPrefixes: array(ipSpaces[i])
     deployBastion: bool(hubNetwork.deployBastion)
@@ -87,7 +87,7 @@ module deployHubNetworks 'deployNetworks.bicep' = [for (hubNetwork, i) in HubNet
 // deploy the spoke networks
 module deploySpokeNetworks 'deployNetworks.bicep' = [for (spokeNetwork, i) in varSpokeNetworks: {
   scope: rg
-  name: 'Deploy-Spoke-${i}-${spokeNetwork.region}'
+  name: 'Deploy-Spoke-${i + 1}-${spokeNetwork.region}'
   params: {
     name: spokeNetwork.name
     location: spokeNetwork.region
