@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "5945006147615153613"
+      "templateHash": "12750375820285936164"
     }
   },
   "parameters": {
@@ -124,7 +124,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "3448191111724870386"
+              "templateHash": "10761911349694050992"
             }
           },
           "parameters": {
@@ -188,7 +188,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-nsg', parameters('name'))]"
+                    "value": "[format('{0}-nsg-{1}', parameters('name'), parameters('location'))]"
                   },
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
@@ -251,7 +251,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-vnet', parameters('name'))]"
+                    "value": "[format('{0}-vnet-{1}', parameters('name'), parameters('location'))]"
                   },
                   "deployBastion": {
                     "value": "[parameters('deployBastion')]"
@@ -371,7 +371,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-vm', parameters('name'))]"
+                    "value": "[format('{0}-vm-{1}', parameters('name'), parameters('location'))]"
                   },
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
@@ -546,7 +546,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-bastion', parameters('name'))]"
+                    "value": "[format('{0}-bastion-{1}', parameters('name'), parameters('location'))]"
                   },
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
@@ -654,7 +654,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-gateway', parameters('name'))]"
+                    "value": "[format('{0}-gateway-{1}', parameters('name'), parameters('location'))]"
                   },
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
@@ -836,7 +836,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "3448191111724870386"
+              "templateHash": "10761911349694050992"
             }
           },
           "parameters": {
@@ -900,7 +900,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-nsg', parameters('name'))]"
+                    "value": "[format('{0}-nsg-{1}', parameters('name'), parameters('location'))]"
                   },
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
@@ -963,7 +963,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-vnet', parameters('name'))]"
+                    "value": "[format('{0}-vnet-{1}', parameters('name'), parameters('location'))]"
                   },
                   "deployBastion": {
                     "value": "[parameters('deployBastion')]"
@@ -1083,7 +1083,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-vm', parameters('name'))]"
+                    "value": "[format('{0}-vm-{1}', parameters('name'), parameters('location'))]"
                   },
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
@@ -1258,7 +1258,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-bastion', parameters('name'))]"
+                    "value": "[format('{0}-bastion-{1}', parameters('name'), parameters('location'))]"
                   },
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
@@ -1366,7 +1366,7 @@
                     "value": "[parameters('location')]"
                   },
                   "name": {
-                    "value": "[format('{0}-gateway', parameters('name'))]"
+                    "value": "[format('{0}-gateway-{1}', parameters('name'), parameters('location'))]"
                   },
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"

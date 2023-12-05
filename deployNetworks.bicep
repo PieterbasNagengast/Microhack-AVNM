@@ -20,7 +20,7 @@ module nsg 'modules/nsg.bicep' = {
   name: 'Deploy-NSG-${name}-${location}-${timeStamp}'
   params: {
     location: location
-    name: '${name}-nsg'
+    name: '${name}-nsg-${location}'
     tagsByResource: tagsByResource
   }
 }
@@ -30,7 +30,7 @@ module vnet 'modules/vnet.bicep' = {
   params: {
     addressPrefixes: addressPrefixes
     location: location
-    name: '${name}-vnet'
+    name: '${name}-vnet-${location}'
     deployBastion: deployBastion
     deployGateway: deployGateway
     tagsByResource: tagsByResource
@@ -42,7 +42,7 @@ module vm 'modules/vm.bicep' = if (deployVM) {
   name: 'Deploy-VM-${name}-${location}-${timeStamp}'
   params: {
     location: location
-    name: '${name}-vm'
+    name: '${name}-vm-${location}'
     tagsByResource: tagsByResource
     subnetID: vnet.outputs.defaultSubnetID
     adminUsername: adminUsername
@@ -56,7 +56,7 @@ module bastion 'modules/bastion.bicep' = if (deployBastion) {
   name: 'Deploy-Bastion-${name}-${location}-${timeStamp}'
   params: {
     location: location
-    name: '${name}-bastion'
+    name: '${name}-bastion-${location}'
     tagsByResource: tagsByResource
     subnetID: deployBastion ? vnet.outputs.bastionSubnetID : ''
     bastionSku: bastionSku
@@ -67,7 +67,7 @@ module gateway 'modules/gateway.bicep' = if (deployGateway) {
   name: 'Deploy-Gateway-${name}-${location}-${timeStamp}'
   params: {
     location: location
-    name: '${name}-gateway'
+    name: '${name}-gateway-${location}'
     tagsByResource: tagsByResource
     subnetID: deployGateway ? vnet.outputs.gatewaySubnetID : ''
   }
