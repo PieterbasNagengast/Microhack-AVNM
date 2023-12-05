@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "9195132584627732028"
+      "templateHash": "5945006147615153613"
     }
   },
   "parameters": {
@@ -124,7 +124,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "424472479539840778"
+              "templateHash": "3448191111724870386"
             }
           },
           "parameters": {
@@ -177,7 +177,7 @@
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-NSG-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-NSG-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -237,7 +237,7 @@
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -263,7 +263,7 @@
                     "value": "[parameters('tagsByResource')]"
                   },
                   "nsgID": {
-                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}-{1}', parameters('name'), parameters('timeStamp'))), '2022-09-01').outputs.id.value]"
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))), '2022-09-01').outputs.id.value]"
                   }
                 },
                 "template": {
@@ -353,14 +353,14 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}-{1}', parameters('name'), parameters('timeStamp')))]"
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp')))]"
               ]
             },
             {
               "condition": "[parameters('deployVM')]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-VM-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-VM-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -377,7 +377,7 @@
                     "value": "[parameters('tagsByResource')]"
                   },
                   "subnetID": {
-                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp'))), '2022-09-01').outputs.defaultSubnetID.value]"
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))), '2022-09-01').outputs.defaultSubnetID.value]"
                   },
                   "adminUsername": {
                     "value": "[parameters('adminUsername')]"
@@ -528,14 +528,14 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp')))]"
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp')))]"
               ]
             },
             {
               "condition": "[parameters('deployBastion')]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-Bastion-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-Bastion-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -551,7 +551,7 @@
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
                   },
-                  "subnetID": "[if(parameters('deployBastion'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp'))), '2022-09-01').outputs.bastionSubnetID.value), createObject('value', ''))]",
+                  "subnetID": "[if(parameters('deployBastion'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))), '2022-09-01').outputs.bastionSubnetID.value), createObject('value', ''))]",
                   "bastionSku": {
                     "value": "[parameters('bastionSku')]"
                   }
@@ -636,14 +636,14 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp')))]"
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp')))]"
               ]
             },
             {
               "condition": "[parameters('deployGateway')]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-Gateway-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-Gateway-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -659,7 +659,7 @@
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
                   },
-                  "subnetID": "[if(parameters('deployGateway'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp'))), '2022-09-01').outputs.gatewaySubnetID.value), createObject('value', ''))]"
+                  "subnetID": "[if(parameters('deployGateway'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))), '2022-09-01').outputs.gatewaySubnetID.value), createObject('value', ''))]"
                 },
                 "template": {
                   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -773,7 +773,7 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp')))]"
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp')))]"
               ]
             }
           ]
@@ -836,7 +836,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "424472479539840778"
+              "templateHash": "3448191111724870386"
             }
           },
           "parameters": {
@@ -889,7 +889,7 @@
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-NSG-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-NSG-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -949,7 +949,7 @@
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -975,7 +975,7 @@
                     "value": "[parameters('tagsByResource')]"
                   },
                   "nsgID": {
-                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}-{1}', parameters('name'), parameters('timeStamp'))), '2022-09-01').outputs.id.value]"
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))), '2022-09-01').outputs.id.value]"
                   }
                 },
                 "template": {
@@ -1065,14 +1065,14 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}-{1}', parameters('name'), parameters('timeStamp')))]"
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-NSG-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp')))]"
               ]
             },
             {
               "condition": "[parameters('deployVM')]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-VM-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-VM-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -1089,7 +1089,7 @@
                     "value": "[parameters('tagsByResource')]"
                   },
                   "subnetID": {
-                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp'))), '2022-09-01').outputs.defaultSubnetID.value]"
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))), '2022-09-01').outputs.defaultSubnetID.value]"
                   },
                   "adminUsername": {
                     "value": "[parameters('adminUsername')]"
@@ -1240,14 +1240,14 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp')))]"
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp')))]"
               ]
             },
             {
               "condition": "[parameters('deployBastion')]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-Bastion-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-Bastion-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -1263,7 +1263,7 @@
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
                   },
-                  "subnetID": "[if(parameters('deployBastion'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp'))), '2022-09-01').outputs.bastionSubnetID.value), createObject('value', ''))]",
+                  "subnetID": "[if(parameters('deployBastion'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))), '2022-09-01').outputs.bastionSubnetID.value), createObject('value', ''))]",
                   "bastionSku": {
                     "value": "[parameters('bastionSku')]"
                   }
@@ -1348,14 +1348,14 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp')))]"
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp')))]"
               ]
             },
             {
               "condition": "[parameters('deployGateway')]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('Deploy-Gateway-{0}-{1}', parameters('name'), parameters('timeStamp'))]",
+              "name": "[format('Deploy-Gateway-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))]",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -1371,7 +1371,7 @@
                   "tagsByResource": {
                     "value": "[parameters('tagsByResource')]"
                   },
-                  "subnetID": "[if(parameters('deployGateway'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp'))), '2022-09-01').outputs.gatewaySubnetID.value), createObject('value', ''))]"
+                  "subnetID": "[if(parameters('deployGateway'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp'))), '2022-09-01').outputs.gatewaySubnetID.value), createObject('value', ''))]"
                 },
                 "template": {
                   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -1485,7 +1485,7 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}', parameters('name'), parameters('timeStamp')))]"
+                "[resourceId('Microsoft.Resources/deployments', format('Deploy-VNET-{0}-{1}-{2}', parameters('name'), parameters('location'), parameters('timeStamp')))]"
               ]
             }
           ]

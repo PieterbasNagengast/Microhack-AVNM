@@ -17,7 +17,7 @@ param adminUsername string
 param adminPassword string
 
 module nsg 'modules/nsg.bicep' = {
-  name: 'Deploy-NSG-${name}-${timeStamp}'
+  name: 'Deploy-NSG-${name}-${location}-${timeStamp}'
   params: {
     location: location
     name: '${name}-nsg'
@@ -26,7 +26,7 @@ module nsg 'modules/nsg.bicep' = {
 }
 
 module vnet 'modules/vnet.bicep' = {
-  name: 'Deploy-VNET-${name}-${timeStamp}'
+  name: 'Deploy-VNET-${name}-${location}-${timeStamp}'
   params: {
     addressPrefixes: addressPrefixes
     location: location
@@ -39,7 +39,7 @@ module vnet 'modules/vnet.bicep' = {
 }
 
 module vm 'modules/vm.bicep' = if (deployVM) {
-  name: 'Deploy-VM-${name}-${timeStamp}'
+  name: 'Deploy-VM-${name}-${location}-${timeStamp}'
   params: {
     location: location
     name: '${name}-vm'
@@ -53,7 +53,7 @@ module vm 'modules/vm.bicep' = if (deployVM) {
 }
 
 module bastion 'modules/bastion.bicep' = if (deployBastion) {
-  name: 'Deploy-Bastion-${name}-${timeStamp}'
+  name: 'Deploy-Bastion-${name}-${location}-${timeStamp}'
   params: {
     location: location
     name: '${name}-bastion'
@@ -64,7 +64,7 @@ module bastion 'modules/bastion.bicep' = if (deployBastion) {
 }
 
 module gateway 'modules/gateway.bicep' = if (deployGateway) {
-  name: 'Deploy-Gateway-${name}-${timeStamp}'
+  name: 'Deploy-Gateway-${name}-${location}-${timeStamp}'
   params: {
     location: location
     name: '${name}-gateway'
