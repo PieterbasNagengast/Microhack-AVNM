@@ -14,6 +14,8 @@ param adminUsername string = ''
 @secure()
 param adminPassword string = ''
 
+param timeStamp string = utcNow()
+
 // // define the os type
 // type _osType = 'Windows' | 'Linux' | 'none'
 
@@ -68,7 +70,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
 // deploy the hub networks
 module deployHubNetworks 'deployNetworks.bicep' = [for (hubNetwork, i) in HubNetworks: {
   scope: rg
-  name: 'Deploy-Hub-${i + 1}-${hubNetwork.region}'
+  name: 'Deploy-Hub-${i + 1}-${hubNetwork.region}-${timeStamp}}'
   params: {
     name: hubNetwork.name
     location: hubNetwork.region
@@ -81,13 +83,14 @@ module deployHubNetworks 'deployNetworks.bicep' = [for (hubNetwork, i) in HubNet
     osType: string(hubNetwork.osType)
     vmSize: vmsize
     tagsByResource: tagsByResource
+    timeStamp: timeStamp
   }
 }]
 
 // deploy the spoke networks
 module deploySpokeNetworks 'deployNetworks.bicep' = [for (spokeNetwork, i) in varSpokeNetworks: {
   scope: rg
-  name: 'Deploy-Spoke-${i + 1}-${spokeNetwork.region}'
+  name: 'Deploy-Spoke-${i + 1}-${spokeNetwork.region}-${timeStamp}'
   params: {
     name: spokeNetwork.name
     location: spokeNetwork.region
@@ -98,6 +101,7 @@ module deploySpokeNetworks 'deployNetworks.bicep' = [for (spokeNetwork, i) in va
     osType: string(spokeNetwork.osType)
     vmSize: vmsize
     tagsByResource: tagsByResource
+    timeStamp: timeStamp
   }
 }]
 
