@@ -70,7 +70,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
 // deploy the hub networks
 module deployHubNetworks 'deployNetworks.bicep' = [for (hubNetwork, i) in HubNetworks: {
   scope: rg
-  name: 'Deploy-Hub-${i + 1}-${hubNetwork.region}-${timeStamp}}'
+  name: 'Deploy-Hub-${i + 1}-${hubNetwork.region}-${timeStamp}'
   params: {
     name: hubNetwork.name
     location: hubNetwork.region

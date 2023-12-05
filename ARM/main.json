@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "18057495754556173384"
+      "templateHash": "9195132584627732028"
     }
   },
   "parameters": {
@@ -72,7 +72,7 @@
       },
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "[format('Deploy-Hub-{0}-{1}-{2}}}', add(copyIndex(), 1), parameters('HubNetworks')[copyIndex()].region, parameters('timeStamp'))]",
+      "name": "[format('Deploy-Hub-{0}-{1}-{2}', add(copyIndex(), 1), parameters('HubNetworks')[copyIndex()].region, parameters('timeStamp'))]",
       "resourceGroup": "[parameters('resourceGroupName')]",
       "properties": {
         "expressionEvaluationOptions": {
