@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "12750375820285936164"
+      "templateHash": "13478743233801232010"
     }
   },
   "parameters": {
@@ -124,7 +124,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "10761911349694050992"
+              "templateHash": "8973583189653358092"
             }
           },
           "parameters": {
@@ -399,7 +399,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.23.1.45101",
-                      "templateHash": "271687616762261643"
+                      "templateHash": "1338450077235538191"
                     }
                   },
                   "parameters": {
@@ -457,7 +457,7 @@
                       "location": "[parameters('location')]",
                       "properties": {
                         "osProfile": {
-                          "computerName": "[parameters('name')]",
+                          "computerName": "[take(parameters('name'), 15)]",
                           "adminUsername": "[parameters('adminUsername')]",
                           "adminPassword": "[parameters('adminPassword')]"
                         },
@@ -836,7 +836,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "10761911349694050992"
+              "templateHash": "8973583189653358092"
             }
           },
           "parameters": {
@@ -1111,7 +1111,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.23.1.45101",
-                      "templateHash": "271687616762261643"
+                      "templateHash": "1338450077235538191"
                     }
                   },
                   "parameters": {
@@ -1169,7 +1169,7 @@
                       "location": "[parameters('location')]",
                       "properties": {
                         "osProfile": {
-                          "computerName": "[parameters('name')]",
+                          "computerName": "[take(parameters('name'), 15)]",
                           "adminUsername": "[parameters('adminUsername')]",
                           "adminPassword": "[parameters('adminPassword')]"
                         },

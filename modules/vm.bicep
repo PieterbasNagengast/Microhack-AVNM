@@ -31,7 +31,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-11-01' = {
   location: location
   properties: {
     osProfile: {
-      computerName: name
+      computerName: take(name, 15)
       adminUsername: adminUsername
       adminPassword: adminPassword
     }
